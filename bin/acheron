@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #/
-#/ Usage: acheron <cmd> [daemon-options] -- [options]
+#/ Usage: acheron <cmd> [options]
 #/
 #/ Options:
 #/
@@ -28,7 +28,6 @@ $stderr.sync = true
 
 require 'optparse'
 require 'yaml'
-require 'pp'
 
 require 'trickery/hash/deep_merge'
 require 'trickery/hash/deep_ostruct'
@@ -89,7 +88,7 @@ file_opts = {}
 if File.exist?(config[:configfile])
   file_opts = YAML.load(File.read(config[:configfile]))
 else
-  warn "Unable to read config file at #{config[:config_file]}"
+  warn "Unable to read config file at #{config[:configfile]}"
 end
 
 # merge config ii

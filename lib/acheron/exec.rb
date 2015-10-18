@@ -7,10 +7,11 @@ require 'faraday'
 
 module Acheron
 
-  class Exec < Struct.new(:options)
+  class Exec < Struct.new(:config)
 
     def run
-      puts 'Acheron started slacking.'
+      check
+      reconnect
       x_name = config.rabbitmq.exchange
       exchange = @channel.fanout(x_name)
       queue = @channel.queue('', exclusive: true)
@@ -63,6 +64,13 @@ module Acheron
         "https://voicerepublic.slack.com" +
         "/services/hooks/incoming-webhook" +
         "?token=" + config.slack.token
+    end
+
+    def check
+      if config.slack.token.nil?
+        warn 'Slack token is missing.'
+        exit 1
+      end
     end
 
   end
