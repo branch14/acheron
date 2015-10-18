@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'simon_the_slacker/version'
+require 'acheron/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "simon_the_slacker"
-  spec.version       = SimonTheSlacker::VERSION
+  spec.name          = "acheron"
+  spec.version       = Acheron::VERSION
   spec.authors       = ["phil"]
   spec.email         = ["phil@branch14.org"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{Listens to RabbitMQ and spams Slack.}
+  spec.summary       = %q{Listens to RabbitMQ and spams Slack.}
+  spec.homepage      = "http://github.com/branch14/acheron"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trickery", "~> 0.3"
+  spec.add_dependency "trickery", "~> 0.0.3"
   spec.add_dependency "daemons"
   spec.add_dependency "bunny"
   spec.add_dependency "faraday"

@@ -5,12 +5,12 @@ require 'daemons'
 require 'bunny'
 require 'faraday'
 
-module SimonTheSlacker
+module Acheron
 
   class Exec < Struct.new(:options)
 
     def run
-      puts 'Simon started slacking.'
+      puts 'Acheron started slacking.'
       x_name = config.rabbitmq.exchange
       exchange = @channel.fanout(x_name)
       queue = @channel.queue('', exclusive: true)

@@ -1,4 +1,4 @@
-Copyright (c) 2015 phil
+Copyright (c) 2015 Phil Hofmann <phil@branch14.org>
 
 MIT License
 

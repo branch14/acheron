@@ -1,14 +1,23 @@
 #!/usr/bin/env ruby
 #/
-#/ Usage: simon-the-slacker [options]
+#/ Usage: acheron <cmd> [daemon-options] -- [options]
 #/
 #/ Options:
 #/
-#/   -x, --exchange <rabbitmq-exchange> (default: 'simon')
+#/   -x, --exchange <rabbitmq-exchange> (default: 'acheron')
 #/
-#/   -c, --channel <slack-channel> (default: '#simon')
+#/   -c, --channel <slack-channel> (default: '#acheron')
 #/
 #/   -t, --token <slack-token> (no default)
+#/
+#/   -u, --username <slack-username (default: 'Acheron'>
+#/
+#/   -i, --icon_emoji <slack-icon-emoji> (default: ':space_invader:')
+#/
+#/   -f, --configfile <config-file> (default: './acheron.yml')
+#/
+#/   -p, --piddir <pid-directory> (default: '/var/run')
+#/
 #/
 #/ Configuration:
 #/
@@ -26,19 +35,19 @@ require 'trickery/hash/deep_ostruct'
 
 require 'daemons'
 
-require File.expand_path(File.join(%w(.. .. lib simon_the_slacker)), __FILE__)
+require File.expand_path(File.join(%w(.. .. lib acheron)), __FILE__)
 
 # default options
 default_opts = {
-  configfile: File.expand_path('simon_the_slacker.yml', Dir.pwd),
+  configfile: File.expand_path('acheron.yml', Dir.pwd),
   piddir: '/var/run',
   slack: {
-    channel: '#simon',
-    username: 'Simon',
-    icon_emoji: ':squirrel:'
+    channel: '#acheron',
+    username: 'Acheron',
+    icon_emoji: ':space_invader:'
   },
   rabbitmq: {
-    exchange: 'simon'
+    exchange: 'acheron'
   }
 }
 
@@ -58,27 +67,27 @@ ARGV.options do |o|
 end
 
 # load options from env
-env_options = {
-  configfile: ENV['SIMON_CONFIGFILE'],
-  piddir: ENV['SIMON_PIDDIR'],
+env_opts = {
+  configfile: ENV['ACHERON_CONFIGFILE'],
+  piddir: ENV['ACHERON_PIDDIR'],
   slack: {
-    channel: ENV['SIMON_SLACK_CHANNEL'],
-    username: ENV['SIMON_SLACK_USERNAME'],
-    icon_emoji: ENV['SIMON_SLACK_ICON_EMOJI'],
-    token: ENV['SIMON_SLACK_TOKEN']
+    channel: ENV['ACHERON_SLACK_CHANNEL'],
+    username: ENV['ACHERON_SLACK_USERNAME'],
+    icon_emoji: ENV['ACHERON_SLACK_ICON_EMOJI'],
+    token: ENV['ACHERON_SLACK_TOKEN']
   },
   rabbitmq: {
-    exchange: ENV['SIMON_RABBITMQ_EXCHANGE']
+    exchange: ENV['ACHERON_RABBITMQ_EXCHANGE']
   }
 }
 
 # merge config i
-config = default_options.deep_merge(env_opts, cli_opts)
+config = default_opts.deep_merge(env_opts, cli_opts)
 
 # load options from file
-file_opts = nil
-if File.exist?(config[:config_file])
-  file_opts = YAML.load(File.read(config[:config_file]))
+file_opts = {}
+if File.exist?(config[:configfile])
+  file_opts = YAML.load(File.read(config[:configfile]))
 else
   warn "Unable to read config file at #{config[:config_file]}"
 end
@@ -86,14 +95,9 @@ end
 # merge config ii
 config = default_opts.deep_merge(file_opts, env_opts, cli_opts)
 
-pp config
-
 # daemonize
-#base = File.expand_path('../..', __FILE__)
-#piddir = File.join(base, 'tmp', 'pids')
 Daemons.run_proc(File.basename(__FILE__), dir: config[:piddir]) do
-  Dir.chdir(base)
-  sts = SimonTheSlacker::Exec.new(config.deep_ostruct)
-  puts 'Simon is ready to slack.'
+  sts = Acheron::Exec.new(config.deep_ostruct)
+  puts 'Acheron is ready to slack.'
   sts.run
 end
