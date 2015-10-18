@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+#/
+#/ Usage: simon-the-slacker [options]
+#/
+#/ Options:
+#/
+#/   -x, --exchange <rabbitmq-exchange> (default: 'simon')
+#/
+#/   -c, --channel <slack-channel> (default: '#simon')
+#/
+#/   -t, --token <slack-token> (no default)
+#/
+#/ Configuration:
+#/
+#/   Defaults <- Config file <- ENV <- CLI
+#/
+
+$stderr.sync = true
+
+require 'optparse'
+require 'yaml'
+require 'pp'
+
+require 'trickery/hash/deep_merge'
+require 'trickery/hash/deep_ostruct'
+
+require 'daemons'
+
+require File.expand_path(File.join(%w(.. .. lib simon_the_slacker)), __FILE__)
+
+# default options
+default_opts = {
+  configfile: File.expand_path('simon_the_slacker.yml', Dir.pwd),
+  piddir: '/var/run',
+  slack: {
+    channel: '#simon',
+    username: 'Simon',
+    icon_emoji: ':squirrel:'
+  },
+  rabbitmq: {
+    exchange: 'simon'
+  }
+}
+
+# parse options from cli
+cli_opts = Hash.new { |h,k| h[k] = Hash.new(&h.default_proc) }
+ARGV.options do |o|
+  o.on("-f", "--configfile=val", String) { |val| cli_opts[:configfile] = val }
+  o.on("-p", "--piddir=val", String)     { |val| cli_opts[:piddir] = val }
+  o.on("-c", "--channel=val", String)    { |val| cli_opts[:slack][:channel] = val }
+  o.on("-u", "--username=val", String)   { |val| cli_opts[:slack][:username] = val }
+  o.on("-i", "--icon_emoji=val", String) { |val| cli_opts[:slack][:icon_emoji] = val }
+  o.on("-t", "--token=val", String)      { |val| cli_opts[:slack][:token] = val }
+  o.on("-x", "--exchange=val", String)   { |val| cli_opts[:rabbitmq][:exchange] = val }
+
+  o.on_tail("-h", "--help") { exec "grep ^#/<'#{__FILE__}'|cut -c4-" }
+  o.parse!
+end
+
+# load options from env
+env_options = {
+  configfile: ENV['SIMON_CONFIGFILE'],
+  piddir: ENV['SIMON_PIDDIR'],
+  slack: {
+    channel: ENV['SIMON_SLACK_CHANNEL'],
+    username: ENV['SIMON_SLACK_USERNAME'],
+    icon_emoji: ENV['SIMON_SLACK_ICON_EMOJI'],
+    token: ENV['SIMON_SLACK_TOKEN']
+  },
+  rabbitmq: {
+    exchange: ENV['SIMON_RABBITMQ_EXCHANGE']
+  }
+}
+
+# merge config i
+config = default_options.deep_merge(env_opts, cli_opts)
+
+# load options from file
+file_opts = nil
+if File.exist?(config[:config_file])
+  file_opts = YAML.load(File.read(config[:config_file]))
+else
+  warn "Unable to read config file at #{config[:config_file]}"
+end
+
+# merge config ii
+config = default_opts.deep_merge(file_opts, env_opts, cli_opts)
+
+pp config
+
+# daemonize
+#base = File.expand_path('../..', __FILE__)
+#piddir = File.join(base, 'tmp', 'pids')
+Daemons.run_proc(File.basename(__FILE__), dir: config[:piddir]) do
+  Dir.chdir(base)
+  sts = SimonTheSlacker::Exec.new(config.deep_ostruct)
+  puts 'Simon is ready to slack.'
+  sts.run
+end
