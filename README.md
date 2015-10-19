@@ -46,7 +46,7 @@ Acheron comes with reasonable defaults
     slack:
       channel: '#acheron'
       username: Acheron
-      icon_emoji: ':squirrel:'
+      icon_emoji: ':space_invader:'
     rabbitmq:
       exchange: acheron
 
@@ -75,6 +75,11 @@ Run the following command to get a list of all arguments:
     acheron --help
 
 
+### Use with Docker
+
+TODO
+
+
 ## Contributing
 
 1. Fork it
@@ -90,15 +95,14 @@ In ancient Greek mythology, Acheron was known as the "river of woe",
 and was one of the five rivers of the Greek underworld. In the Homeric
 poems the Acheron was described as a river of Hades, into which
 Cocytus and [Phlegethon](http://github.com/branch14/phlegethon) both
-flowed.
-
-The Roman poet Virgil called it the principal river of Tartarus, from
-which the Styx and Cocytus both sprang. The newly dead would be
-ferried across the Acheron by Charon in order to enter the Underworld.
+flowed. The Roman poet Virgil called it the principal river of
+Tartarus, from which the Styx and Cocytus both sprang. The newly dead
+would be ferried across the Acheron by Charon in order to enter the
+Underworld. [Wikipedia](https://en.wikipedia.org/wiki/Acheron)
 
 
 ## References
 
-[1] https://www.rabbitmq.com/tutorials/tutorial-three-python.html
-[2] https://www.rabbitmq.com/
-[3] http://slack.com/
+* [1] https://www.rabbitmq.com/tutorials/tutorial-three-python.html
+* [2] https://www.rabbitmq.com/
+* [3] http://slack.com/
