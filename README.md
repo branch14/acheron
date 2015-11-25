@@ -106,3 +106,4 @@ Underworld. [Wikipedia](https://en.wikipedia.org/wiki/Acheron)
 * [1] https://www.rabbitmq.com/tutorials/tutorial-three-python.html
 * [2] https://www.rabbitmq.com/
 * [3] http://slack.com/
+docker run -e ARCHERON_RABBITMQ_HOST=rabbitmq -e ACHERON_SLACK_TOKEN=asdf -e ACHERON_SLACK_CHANNEL=@branch14 branch14/acheron

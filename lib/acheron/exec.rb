@@ -29,7 +29,12 @@ module Acheron
     private
 
     def reconnect
-      bunny = Bunny.new read_timeout: 10, heartbeat: 10
+      opts = {
+        read_timeout: 10,
+        heartbeat: 10,
+        host: config.rabbitmq.host
+      }
+      bunny = Bunny.new(opts)
       bunny.start
       @channel = bunny.create_channel
     end
@@ -41,7 +46,7 @@ module Acheron
       end
       opts[:text] = message
       payload = defaults.merge(opts)
-      faraday.post slack_url, payload: JSON.unparse(payload)
+      faraday.post config.slack.webhook, payload: JSON.unparse(payload)
     end
 
     def defaults
@@ -53,22 +58,15 @@ module Acheron
     end
 
     def faraday
-      @faraday ||= Faraday.new(url: slack_url) do |f|
+      @faraday ||= Faraday.new(url: config.slack.webhook) do |f|
         f.request :url_encoded
         f.adapter Faraday.default_adapter
       end
     end
 
-    def slack_url
-      @slack_url ||=
-        "https://voicerepublic.slack.com" +
-        "/services/hooks/incoming-webhook" +
-        "?token=" + config.slack.token
-    end
-
     def check
-      if config.slack.token.nil?
-        warn 'Slack token is missing.'
+      if config.slack.webhook.nil?
+        warn 'Slack webhook is missing.'
         exit 1
       end
     end

@@ -28,11 +28,12 @@ $stderr.sync = true
 
 require 'optparse'
 require 'yaml'
+require 'pp'
+
+require 'daemons'
 
 require 'trickery/hash/deep_merge'
 require 'trickery/hash/deep_ostruct'
-
-require 'daemons'
 
 require File.expand_path(File.join(%w(.. .. lib acheron)), __FILE__)
 
@@ -46,7 +47,8 @@ default_opts = {
     icon_emoji: ':space_invader:'
   },
   rabbitmq: {
-    exchange: 'acheron'
+    exchange: 'acheron',
+    host: 'localhost'
   }
 }
 
@@ -58,8 +60,9 @@ ARGV.options do |o|
   o.on("-c", "--channel=val", String)    { |val| cli_opts[:slack][:channel] = val }
   o.on("-u", "--username=val", String)   { |val| cli_opts[:slack][:username] = val }
   o.on("-i", "--icon_emoji=val", String) { |val| cli_opts[:slack][:icon_emoji] = val }
-  o.on("-t", "--token=val", String)      { |val| cli_opts[:slack][:token] = val }
+  o.on("-w", "--webhook=val", String)    { |val| cli_opts[:slack][:webhook] = val }
   o.on("-x", "--exchange=val", String)   { |val| cli_opts[:rabbitmq][:exchange] = val }
+  o.on("-h", "--host=val", String)       { |val| cli_opts[:rabbitmq][:host] = val }
 
   o.on_tail("-h", "--help") { exec "grep ^#/<'#{__FILE__}'|cut -c4-" }
   o.parse!
@@ -73,10 +76,11 @@ env_opts = {
     channel: ENV['ACHERON_SLACK_CHANNEL'],
     username: ENV['ACHERON_SLACK_USERNAME'],
     icon_emoji: ENV['ACHERON_SLACK_ICON_EMOJI'],
-    token: ENV['ACHERON_SLACK_TOKEN']
+    webhook: ENV['ACHERON_SLACK_WEBHOOK']
   },
   rabbitmq: {
-    exchange: ENV['ACHERON_RABBITMQ_EXCHANGE']
+    exchange: ENV['ACHERON_RABBITMQ_EXCHANGE'],
+    host: ENV['ACHERON_RABBITMQ_HOST']
   }
 }
 
@@ -92,11 +96,9 @@ else
 end
 
 # merge config ii
-config = default_opts.deep_merge(file_opts, env_opts, cli_opts)
+pp config = default_opts.deep_merge(file_opts, env_opts, cli_opts)
 
 # daemonize
 Daemons.run_proc(File.basename(__FILE__), dir: config[:piddir]) do
-  sts = Acheron::Exec.new(config.deep_ostruct)
-  puts 'Acheron is ready to slack.'
-  sts.run
+  Acheron::Exec.new(config.deep_ostruct).run
 end
